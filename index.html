@@ -437,20 +437,29 @@ $('#data').onchange=()=>{ const v=$('#data').value; limpa(9); $('#data-h').textC
 
 /* WhatsApp */
 $('#wa').onclick=()=>{
-  const c=calc(); const L=[];
-  L.push('*Pedido de tábua - '+CFG.loja+'*','');
-  L.push('Olá! Montei minha tábua pelo site e gostaria de confirmar o pedido.','');
-  L.push('*Tábua:* '+baseTxt()+(S.board==='madeira'?' (devolver até o próximo dia útil; se não devolvida, cobrança de '+brl(+CFG.taxaMadeira||150)+')':' (fica comigo)'));
-  L.push('*Pessoas:* '+S.qty+' - '+ocTxt());
-  L.push('*Total:* '+kgTxt(c.totalKg).replace('.',',')+' de queijos e embutidos, em '+c.nB+' tábua'+(c.nB>1?'s':''));
-  L.push('*Valor:* '+brl(c.total),'');
-  L.push('*Queijos:* '+nomes('queijo').join(', '));
-  L.push('*Embutidos:* '+nomes('embutido').join(', '));
-  L.push('*Frutas:* '+nomes('fruta').join(', '));
-  if(compls().length) L.push('*Complementos:* '+compls().join(', '));
-  if(S.obs) L.push('*Recado:* '+S.obs);
-  L.push('','*Data:* '+dataTxt(S.data,true));
-  const url='https://wa.me/'+CFG.whatsapp+'?text='+encodeURIComponent(L.join('\n'));
+  const c=calc();
+  const sep='- - - - - - - - - - - - - - -', line='______________________________';
+  const df=S.data?dataTxt(S.data,true):'-'; const dfCap=df.charAt(0).toUpperCase()+df.slice(1);
+  const valor='R$ '+c.total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const lista=(t,l)=>sep+'\n*'+t+'*\n'+sep+'\n'+l.map(x=>'  - '+x+'\n').join('')+'\n';
+  let m='';
+  m+=line+'\n*GRAN GUSTO EMPORIO*\n_Tabua Gourmet Personalizada_\n'+line+'\n\n';
+  m+='Ola! Acabei de montar minha tabua pelo configurador Gran Gusto e gostaria de confirmar este pedido.\n\n';
+  m+=sep+'\n*DETALHES DO PEDIDO*\n'+sep+'\n\n';
+  m+='*Tabua:* '+(S.board==='mdf'?'MDF Personalizada Gran Gusto Emporio _(fica com voce de lembranca)_':'Rustica de Madeira _(requer devolucao ate o proximo dia util apos o evento)_')+'\n';
+  if(c.nB>1) m+='*Quantidade de tabuas:* '+c.nB+'\n';
+  m+='*Convidados:* '+S.qty+' pessoa'+(S.qty>1?'s':'')+'\n';
+  m+='*Ocasiao:* '+(S.occ==='principal'?'Prato Principal':'Entrada')+'\n';
+  m+='*Gramagem estimada:* '+c.totalKg.toFixed(1)+' kg\n';
+  m+='*Valor estimado:* '+valor+'\n\n';
+  m+=lista('QUEIJOS',nomes('queijo'));
+  m+=lista('EMBUTIDOS & CHARCUTARIA',nomes('embutido'));
+  m+=lista('FRUTAS',nomes('fruta'));
+  if(compls().length) m+=lista('COMPLEMENTOS',compls());
+  if(S.obs) m+=sep+'\n*OBSERVACOES*\n'+sep+'\n'+S.obs+'\n\n';
+  m+=sep+'\n*DATA DESEJADA*\n'+sep+'\n'+dfCap+'\n\n';
+  m+=line+'\n_Aguardo a confirmacao. Obrigado(a)!_\n_Gran Gusto Emporio_';
+  const url='https://wa.me/'+CFG.whatsapp+'?text='+encodeURIComponent(m);
   const w=window.open(url,'_blank'); if(!w) location.href=url;
 };
 
@@ -495,7 +504,7 @@ async function gerarImagem(btn){
 }
 $$('[data-img]').forEach(b=>b.onclick=()=>gerarImagem(b));
 
-$('#novo').onclick=()=>{ S=novoEstado(); $$('.card').forEach(c=>c.classList.remove('sel')); setQty(0); $('#obs').value=''; $('#data').value=''; $('#data-h').textContent=''; $('#prev8').innerHTML=''; $('#prev10').innerHTML=''; $$('.alert').forEach(a=>a.classList.remove('on')); vai(1); };
+$('#novo').onclick=()=>{ $$('.step').forEach(x=>x.classList.remove('on')); S=novoEstado(); $$('.card').forEach(c=>c.classList.remove('sel')); setQty(0); $('#obs').value=''; $('#data').value=''; $('#data-h').textContent=''; $('#prev8').innerHTML=''; $('#prev10').innerHTML=''; $$('.alert').forEach(a=>a.classList.remove('on')); vai(1); };
 
 /* ===================== DADOS DA PLANILHA ===================== */
 function aplica(d){
