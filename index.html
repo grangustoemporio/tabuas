@@ -267,7 +267,7 @@ footer a{color:var(--cream)}
   </section>
 
   <section class="step" id="s9">
-    <div class="st-h"><div class="eyebrow">Etapa 9</div><h2>Para qual dia?</h2><p>As tábuas são montadas no dia, com pelo menos 1 dia de antecedência. Não abrimos aos domingos.</p></div>
+    <div class="st-h"><div class="eyebrow">Etapa 9</div><h2>Para qual dia?</h2><p>As tábuas são montadas no dia, com pelo menos 1 dia de antecedência. Aos domingos, a entrega é bem cedo: entre 8:00 e 8:30.</p></div>
     <div class="box glass"><div class="lbl">Data desejada</div><input class="in" type="date" id="data"><p class="hint" id="data-h"></p></div>
     <div class="alert" id="a9"></div>
     <div class="nav"><button class="btn sec" data-back="9">Voltar</button><button class="btn" data-next="9">Confirmar data</button></div>
@@ -365,7 +365,7 @@ const VALIDA={
   6:()=>S.fruta.length>=Math.min(MIN.fruta,deTipo('fruta').length)?true:(alerta(6,'Escolha no mínimo 3 frutas.'),false),
   7:()=>{ S.obs=$('#obs').value.trim(); return true; },
   8:()=>true,
-  9:()=>{ const v=$('#data').value; if(!v||v<amanha()){ alerta(9,'Escolha uma data a partir de amanhã.'); return false; } if(new Date(v+'T12:00:00').getDay()===0){ alerta(9,'Aos domingos a loja não abre. Escolha outro dia.'); return false; } S.data=v; return true; }
+  9:()=>{ const v=$('#data').value; if(!v||v<amanha()){ alerta(9,'Escolha uma data a partir de amanhã.'); return false; } S.data=v; return true; }
 };
 $$('[data-next]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.next; if(VALIDA[n]()){ limpa(n); vai(n+1); } });
 $$('[data-back]').forEach(b=>b.onclick=()=>vai(+b.dataset.back-1));
@@ -426,14 +426,16 @@ function resumo(sel, comData){
     +'<div class="price"><small>Valor do pedido</small><div class="v">'+brl(c.total)+'</div><p>Inclui a tábua e todos os itens escolhidos</p></div>'
     +tags('Queijos',nomes('queijo'))+tags('Embutidos',nomes('embutido'))+tags('Frutas',nomes('fruta'))+tags('Complementos',compls())
     +(S.obs?'<div class="sec-t">Recado</div><p class="obs">'+esc(S.obs)+'</p>':'')
-    +(comData&&S.data?'<div class="sec-t">Data</div><p>'+esc(dataTxt(S.data,true))+'</p>':'')
+    +(comData&&S.data?'<div class="sec-t">Data</div><p>'+esc(dataTxt(S.data,true))+(ehDom(S.data)?' · '+DOM_TXT:'')+'</p>':'')
     +(S.board==='madeira'?'<p class="note">A tábua de madeira é cedida como cortesia. Pedimos a devolução até o próximo dia útil após o evento; se não for devolvida, é cobrado '+brl(+CFG.taxaMadeira||150)+'.</p>':'');
 }
 
 /* data */
+const ehDom=v=>!!v&&new Date(v+'T12:00:00').getDay()===0;
+const DOM_TXT='entrega entre 8:00 e 8:30';
 function amanha(){ const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); }
 $('#data').min=amanha();
-$('#data').onchange=()=>{ const v=$('#data').value; limpa(9); $('#data-h').textContent=v?'Data escolhida: '+dataTxt(v,true):''; };
+$('#data').onchange=()=>{ const v=$('#data').value; limpa(9); $('#data-h').textContent=v?'Data escolhida: '+dataTxt(v,true)+(ehDom(v)?'. Aos domingos a entrega é entre 8:00 e 8:30.':''):''; };
 
 /* WhatsApp */
 $('#wa').onclick=()=>{
@@ -457,7 +459,7 @@ $('#wa').onclick=()=>{
   m+=lista('FRUTAS',nomes('fruta'));
   if(compls().length) m+=lista('COMPLEMENTOS',compls());
   if(S.obs) m+=sep+'\n*OBSERVACOES*\n'+sep+'\n'+S.obs+'\n\n';
-  m+=sep+'\n*DATA DESEJADA*\n'+sep+'\n'+dfCap+'\n\n';
+  m+=sep+'\n*DATA DESEJADA*\n'+sep+'\n'+dfCap+(ehDom(S.data)?'\n_Domingo: entrega entre 8:00 e 8:30_':'')+'\n\n';
   m+=line+'\n_Aguardo a confirmacao. Obrigado(a)!_\n_Gran Gusto Emporio_';
   const url='https://wa.me/'+CFG.whatsapp+'?text='+encodeURIComponent(m);
   const w=window.open(url,'_blank'); if(!w) location.href=url;
@@ -475,7 +477,7 @@ function cartao(){
    +'<div style="background:#004541;border-radius:12px;padding:18px;text-align:center;margin-bottom:16px"><div style="font-size:10px;letter-spacing:3px;color:rgba(255,242,227,.7);text-transform:uppercase;margin-bottom:4px">Valor do pedido</div><div style="font:400 50px/1.25 Italiana,Georgia,serif;color:#FFF2E3">'+brl(c.total)+'</div><div style="font-size:11px;color:rgba(255,242,227,.6);margin-top:6px">Inclui a tábua e todos os itens escolhidos</div></div>'
    +'<div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px">'+col('Queijos',nomes('queijo'))+col('Embutidos',nomes('embutido'))+col('Frutas',nomes('fruta'))+'</div>'
    +(compls().length?'<div style="margin-bottom:14px"><div style="font:700 10px Atkinson Hyperlegible,Arial,sans-serif;letter-spacing:2px;color:#C6243B;text-transform:uppercase;margin-bottom:6px">Complementos</div><div style="font-size:13px;color:#00302D">'+compls().map(esc).join(' · ')+'</div></div>':'')
-   +'<div style="background:#FFFFFF;border:1px solid #E8D9C5;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#5D6F6A;font-weight:700">Data desejada</span><span style="font-size:14px;color:#00302D;font-weight:700">'+(S.data?esc(dataTxt(S.data,true)):'A combinar')+'</span></div>'
+   +'<div style="background:#FFFFFF;border:1px solid #E8D9C5;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#5D6F6A;font-weight:700">Data desejada</span><span style="font-size:14px;color:#00302D;font-weight:700">'+(S.data?esc(dataTxt(S.data,true))+(ehDom(S.data)?' · '+DOM_TXT:''):'A combinar')+'</span></div>'
    +'<div style="text-align:center;font-size:10px;letter-spacing:3px;color:#C6243B;text-transform:uppercase;font-weight:700">Gran Gusto Empório</div></div>';
 }
 function carregaH2C(){ return new Promise((ok,fail)=>{ if(window.html2canvas) return ok(); const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; s.onload=ok; s.onerror=()=>fail(new Error('h2c')); document.head.appendChild(s); }); }
