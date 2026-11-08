@@ -164,7 +164,8 @@ input[type=date].in{width:100%;min-height:3.2rem;padding:.6rem .9rem;border:1.5p
 footer{text-align:center;color:var(--muted);font-size:.82rem;padding:0 1rem 2rem}
 footer a{color:var(--cream)}
 .toast{position:fixed;left:50%;bottom:calc(1rem + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(150%);background:var(--cream);color:var(--bg2);font-weight:700;padding:.7rem 1.1rem;border-radius:99px;transition:.3s;z-index:99;max-width:92vw;text-align:center}
-.toast.on{transform:translateX(-50%) translateY(0)}
+.toast{opacity:0;visibility:hidden}
+.toast.on{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible}
 
 @media (max-width:560px){
   html{font-size:100%}
