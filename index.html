@@ -185,7 +185,7 @@ footer a{color:var(--cream)}
   <section class="step on" id="s1">
     <div class="st-h"><div class="eyebrow">Etapa 1</div><h2>Em qual tábua vamos servir?</h2><p>As duas opções têm o mesmo valor.</p></div>
     <div class="cards">
-      <div class="card glass" id="b-madeira" data-board="madeira"><span class="ok">Escolhida ✓</span><div class="ic">🪵</div><h3>Tábua de madeira</h3><p>Peça rústica da loja, cedida para o seu evento. <b>Devolver até o próximo dia útil.</b></p></div>
+      <div class="card glass" id="b-madeira" data-board="madeira"><span class="ok">Escolhida ✓</span><div class="ic">🌳</div><h3>Tábua de madeira</h3><p>Peça rústica da loja, cedida para o seu evento. <b>Devolver até o próximo dia útil.</b></p></div>
       <div class="card glass" id="b-mdf" data-board="mdf"><span class="ok">Escolhida ✓</span><div class="ic">✨</div><h3>Tábua MDF Gran Gusto</h3><p>Personalizada com a nossa marca. <b>Fica com você</b> de lembrança.</p></div>
     </div>
     <div class="alert" id="a1">Escolha a tábua para continuar.</div>
@@ -445,7 +445,7 @@ function cartao(){
   return '<div style="background:#004541;padding:26px 36px;text-align:center"><img src="'+logoUrl()+'" style="width:60%;max-width:360px;display:block;margin:0 auto" alt="Gran Gusto"><div style="height:2px;background:#C6243B;margin-top:16px"></div></div>'
    +'<div style="padding:22px 30px 18px;background:#FFF2E3;font-family:Atkinson Hyperlegible,Arial,sans-serif">'
    +'<div style="display:flex;gap:10px;margin-bottom:14px">'+box('Tábua',S.board==='mdf'?'MDF Gran Gusto':'Madeira')+box('Pessoas',S.qty+' · '+ocTxt())+box('Total',kgTxt(c.totalKg)+' · '+c.nB+' tábua'+(c.nB>1?'s':''))+'</div>'
-   +'<div style="background:#004541;border-radius:12px;padding:18px;text-align:center;margin-bottom:16px"><div style="font-size:10px;letter-spacing:3px;color:rgba(255,242,227,.7);text-transform:uppercase;margin-bottom:4px">Valor do pedido</div><div style="font:400 50px/1 Italiana,Georgia,serif;color:#FFF2E3">'+brl(c.total)+'</div><div style="font-size:11px;color:rgba(255,242,227,.6);margin-top:6px">Inclui a tábua e todos os itens escolhidos</div></div>'
+   +'<div style="background:#004541;border-radius:12px;padding:18px;text-align:center;margin-bottom:16px"><div style="font-size:10px;letter-spacing:3px;color:rgba(255,242,227,.7);text-transform:uppercase;margin-bottom:4px">Valor do pedido</div><div style="font:400 50px/1.25 Italiana,Georgia,serif;color:#FFF2E3">'+brl(c.total)+'</div><div style="font-size:11px;color:rgba(255,242,227,.6);margin-top:6px">Inclui a tábua e todos os itens escolhidos</div></div>'
    +'<div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px">'+col('Queijos',nomes('queijo'))+col('Embutidos',nomes('embutido'))+col('Frutas',nomes('fruta'))+'</div>'
    +(compls().length?'<div style="margin-bottom:14px"><div style="font:700 10px Atkinson Hyperlegible,Arial,sans-serif;letter-spacing:2px;color:#C6243B;text-transform:uppercase;margin-bottom:6px">Complementos</div><div style="font-size:13px;color:#00302D">'+compls().map(esc).join(' · ')+'</div></div>':'')
    +'<div style="background:#FFFFFF;border:1px solid #E8D9C5;border-radius:10px;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#5D6F6A;font-weight:700">Data desejada</span><span style="font-size:14px;color:#00302D;font-weight:700">'+(S.data?esc(dataTxt(S.data,true)):'A combinar')+'</span></div>'
