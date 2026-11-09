@@ -214,7 +214,7 @@ footer a{color:var(--cream)}
       <div class="quick" id="quick"></div>
       <div class="lbl" style="margin-top:1rem">Ou informe o número</div>
       <div class="stepper"><button type="button" data-d="-1" aria-label="Menos">−</button><input id="qty" type="number" inputmode="numeric" min="1" max="200" value="" placeholder="0" aria-label="Número de pessoas"><button type="button" data-d="1" aria-label="Mais">+</button></div>
-      <p class="hint" id="qty-hint">De 1 a 200 pessoas. A cada 15 pessoas montamos mais uma tábua.</p>
+      <p class="hint" id="qty-hint">De 1 a 200 pessoas. Cada tábua serve até 15 pessoas ou 1,8 kg; acima disso montamos mais uma.</p>
     </div>
     <div class="alert" id="a2">Informe quantas pessoas.</div>
     <div class="nav"><button class="btn sec" data-back="2">Voltar</button><button class="btn" data-next="2">Continuar</button></div>
@@ -297,7 +297,7 @@ footer a{color:var(--cream)}
    Mudou lá, muda aqui. */
 const CFG = Object.assign({
   loja:'Empório Gran Gusto', whatsapp:'5548984786837', taxaMadeira:150, precoTabua:50,
-  taxaPorTabua:null, taxaPorPessoaEntrada:0, taxaPorPessoaPrincipal:0, acrescimoMDF:0, pessoasPorTabua:15, apiUrl:''
+  taxaPorTabua:null, taxaPorPessoaEntrada:0, taxaPorPessoaPrincipal:0, acrescimoMDF:0, pessoasPorTabua:15, kgPorTabua:1.8, apiUrl:''
 }, window.GG_CONFIG || {});
 
 /* Reserva: usada só se a planilha não responder (cópia de 08/11/2026) */
@@ -305,11 +305,11 @@ const RESERVA = [{"id": "provolone", "status": "disponivel", "tipo": "queijo", "
 let TABUA = RESERVA;
 
 /* ===================== MOTOR DE PREÇO (igual ao catálogo) ===================== */
-const nTabuas = p => Math.max(1, Math.ceil((+p||1) / (+CFG.pessoasPorTabua || 15)));
-const extraMDF = (base, p) => base==='mdf' ? nTabuas(p) * (+CFG.acrescimoMDF || 0) : 0;
+const nTabuas = (p, oc=S.occ) => { p=+p||1; const kg=p*(oc==='principal'?220:120)/1000; return Math.max(1, Math.ceil(p/(+CFG.pessoasPorTabua||15)), Math.ceil(kg/(+CFG.kgPorTabua||1.8)-1e-9)); };
+const extraMDF = (base, p, oc) => base==='mdf' ? nTabuas(p, oc) * (+CFG.acrescimoMDF || 0) : 0;
 function taxaMontagem(p, oc){
-  if(CFG.taxaPorTabua==null || CFG.taxaPorTabua==='') return (+CFG.precoTabua||50) * nTabuas(p);
-  return nTabuas(p) * (+CFG.taxaPorTabua) + p * (+(oc==='principal' ? CFG.taxaPorPessoaPrincipal : CFG.taxaPorPessoaEntrada) || 0);
+  if(CFG.taxaPorTabua==null || CFG.taxaPorTabua==='') return (+CFG.precoTabua||50) * nTabuas(p, oc);
+  return nTabuas(p, oc) * (+CFG.taxaPorTabua) + p * (+(oc==='principal' ? CFG.taxaPorPessoaPrincipal : CFG.taxaPorPessoaEntrada) || 0);
 }
 const granRound = v => Math.round((Math.floor(v/10)*10+9.90)*100)/100;
 const item = id => TABUA.find(x=>x.id===id);
@@ -325,11 +325,11 @@ function calc(){
     lista.filter(x=>x.cobranca==='un').forEach(x=>{ kgUn+=(x.pesoG||peso)/1000*pecas; tot+=pecas*x.preco; });
     const kg=lista.filter(x=>x.cobranca!=='un'); if(kg.length){ const cada=Math.max(0,orc-kgUn)/kg.length; kg.forEach(x=>tot+=cada*x.preco); }
     return tot; };
-  const nB = nTabuas(p);
+  const nB = nTabuas(p, oc);
   let sub = cat(q,totalKg*pq,125) + cat(m,totalKg*(1-pq),100);
   S.fruta.map(item).filter(Boolean).forEach(x=>sub+=x.preco*nB);
   Object.entries(S.compl).forEach(([id,n])=>{ const x=item(id); if(x&&n) sub+=x.preco*n; });
-  return {totalKg, nB, total: granRound(taxaMontagem(p,oc) + extraMDF(S.board,p) + sub)};
+  return {totalKg, nB, total: granRound(taxaMontagem(p,oc) + extraMDF(S.board,p,oc) + sub)};
 }
 
 /* ===================== ESTADO ===================== */
@@ -376,14 +376,14 @@ $$('[data-board]').forEach(c=>c.onclick=()=>{ S.board=c.dataset.board; $$('[data
 const QUICK=[2,4,6,8,10,12,15,20,30];
 $('#quick').innerHTML=QUICK.map(n=>'<button type="button" class="qb" data-q="'+n+'">'+n+'</button>').join('');
 function setQty(n){ n=Math.max(0,Math.min(200,parseInt(n)||0)); S.qty=n; $('#qty').value=n||''; $$('.qb').forEach(b=>b.classList.toggle('sel',+b.dataset.q===n)); if(n) limpa(2); dicaQty(); estimativa(); aparaMax(); }
-function dicaQty(){ const nb=nTabuas(S.qty||1); $('#qty-hint').textContent = S.qty ? (S.qty+' pessoa'+(S.qty>1?'s':'')+' · '+nb+' tábua'+(nb>1?'s':'')+'. A cada '+(+CFG.pessoasPorTabua||15)+' pessoas montamos mais uma tábua.') : 'De 1 a 200 pessoas. A cada '+(+CFG.pessoasPorTabua||15)+' pessoas montamos mais uma tábua.'; }
+function dicaQty(){ $('#qty-hint').textContent = (S.qty ? S.qty+' pessoa'+(S.qty>1?'s':'')+'. ' : 'De 1 a 200 pessoas. ')+'Cada tábua serve até '+(+CFG.pessoasPorTabua||15)+' pessoas ou '+String(+CFG.kgPorTabua||1.8).replace('.',',')+' kg; acima disso montamos mais uma.'; }
 $$('.qb').forEach(b=>b.onclick=()=>setQty(b.dataset.q));
 $('#qty').oninput=e=>setQty(e.target.value);
 $$('.stepper [data-d]').forEach(b=>b.onclick=()=>setQty((S.qty||0)+(+b.dataset.d)));
 function aparaMax(){ const mx=getMax(S.qty||1); ['queijo','embutido'].forEach(t=>{ if(S[t].length>mx) S[t]=S[t].slice(0,mx); }); }
 /* etapa 3 */
 $$('[data-occ]').forEach(c=>c.onclick=()=>{ S.occ=c.dataset.occ; $$('[data-occ]').forEach(x=>x.classList.toggle('sel',x===c)); limpa(3); estimativa(); });
-function estimativa(){ const el=$('#est'); if(!S.qty||!S.occ){ el.hidden=true; return; } const kg=S.qty*(S.occ==='principal'?220:120)/1000; const nb=nTabuas(S.qty); el.hidden=false; $('#est-v').textContent=kgTxt(kg); $('#est-p').textContent='Para '+S.qty+' pessoa'+(S.qty>1?'s':'')+' como '+(S.occ==='principal'?'prato principal':'entrada')+': cerca de '+kgTxt(kg)+' de queijos e embutidos, em '+nb+' tábua'+(nb>1?'s':'')+'.'; }
+function estimativa(){ const el=$('#est'); if(!S.qty||!S.occ){ el.hidden=true; return; } const kg=S.qty*(S.occ==='principal'?220:120)/1000; const nb=nTabuas(S.qty,S.occ); el.hidden=false; $('#est-v').textContent=kgTxt(kg); $('#est-p').textContent='Para '+S.qty+' pessoa'+(S.qty>1?'s':'')+' como '+(S.occ==='principal'?'prato principal':'entrada')+': cerca de '+kgTxt(kg)+' de queijos e embutidos, em '+nb+' tábua'+(nb>1?'s':'')+'.'; }
 
 /* grades 4–7 */
 const TIER=g=>/premium/i.test(g||'')?'premium':/especia/i.test(g||'')?'especial':'classico';
